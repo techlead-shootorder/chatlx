@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Subscription {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  planType        PlanType @default(TRIAL)
+  startDate       DateTime @default(now())
+  endDate         DateTime
+  isActive        Boolean  @default(true)
+  requestsUsed    Int      @default(0)
+  tokensUsed      Int      @default(0)
+  maxRequests     Int
+  maxTokens       Int
+  trialDaysLeft   Int?     @default(14)
+  chatbotsCreated Int      @default(0)
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model PaymentOrder {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  userId    String
+  planType  PlanType
+  amount    Float
+  status    String
+  paymentId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model RazorpaySubscription {
+  id             String   @id @default(uuid())
+  userId         String
+  subscriptionId String   @unique
+  planId         String
+  planType       PlanType
+  status         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model Chatbot {
+  id                 String        @id @default(uuid())
+  companyName        String
+  companyDescription String?
+  industry           String?
+  location           String?
+  operatingHours     String?
+  email              String?
+  phone              String?
+  address            String?
+  pricing            String?
+  serviceAreas       String?
+  botName            String
+  welcomeMessage     String?
+  fallbackMessage    String?
+  personality        String?
+  isDefault          Boolean       @default(false)
+  createdBy          String?
+  createdAt          DateTime               @default(now())
+  services           Json?
+  pills              Json?
+  howToUse           String?
+  subtext            String?
+  logo               String?
+  user               User?         @relation(fields: [createdBy], references: [id])
+  integrations       Integration[]
+  leads              Lead[]
+}
+
+model User {
+  id                    String                 @id @default(uuid())
+  email                 String                 @unique
+  password              String?
+  createdAt             DateTime               @default(now())
+  company               String?
+  fullName              String?
+  phone                 String?
+  chatbots              Chatbot[]
+  leads                 Lead[]                 @relation("UserLeads")
+  paymentOrders         PaymentOrder[]
+  razorpaySubscriptions RazorpaySubscription[]
+  subscription          Subscription?
+}
+
+model Lead {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String?
+  phone     String?
+  messages  Json[]
+  status    String   @default("new")
+  source    String   @default("chatbot")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chatbotId String
+  userId    String?
+  chatbot   Chatbot  @relation(fields: [chatbotId], references: [id])
+  user      User?    @relation("UserLeads", fields: [userId], references: [id])
+}
+
+model Integration {
+  id             String   @id @default(uuid())
+  logo           String?
+  primaryColor   String?
+  chatbotId      String?
+  domain         String?
+  pills          Json?
+  subText        String?
+  initialMessage String?
+  phone          String?
+  secondaryColor String?
+  chatbot        Chatbot? @relation(fields: [chatbotId], references: [id])
+}
+
+enum PlanType {
+  BASIC
+  PRO
+  ENTERPRISE
+  TRIAL
+  ADMIN
+}
