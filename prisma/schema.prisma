@@ -66,12 +66,12 @@ model Chatbot {
   personality        String?
   isDefault          Boolean       @default(false)
   createdBy          String?
-  createdAt          DateTime               @default(now())
   services           Json?
   pills              Json?
   howToUse           String?
   subtext            String?
   logo               String?
+  createdAt          DateTime      @default(now())
   user               User?         @relation(fields: [createdBy], references: [id])
   integrations       Integration[]
   leads              Lead[]
@@ -119,6 +119,7 @@ model Integration {
   initialMessage String?
   phone          String?
   secondaryColor String?
+  fontColor      String?
   chatbot        Chatbot? @relation(fields: [chatbotId], references: [id])
 }
 

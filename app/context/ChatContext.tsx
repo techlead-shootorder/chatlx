@@ -21,6 +21,7 @@ type Integration = {
   logo: String;
   primaryColor: String;
   secondaryColor: String;
+  fontColor: String;
   chatbotId: String;
   domain: String;
   pills: Object;

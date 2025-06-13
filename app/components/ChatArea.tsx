@@ -26,7 +26,8 @@ export default function ChatArea() {
 
     // Show welcome screen if this is a new chat with only the welcome message
     const isNewChat = messages.length === 1 && messages[0].role === 'assistant';
-
+     
+    console.log("testing font color in integration", integration);
     return (
         <div className=" flex-1 overflow-y-auto p-4"
         style={{ backgroundColor: integration?.primaryColor}}>
@@ -47,7 +48,7 @@ export default function ChatArea() {
                                     <div
                                         className="inline-block rounded-lg p-3 text-white max-w-md"
                                         dangerouslySetInnerHTML={{ __html: message.content }}
-                                        style={{backgroundColor: integration?.primaryColor }}
+                                        style={{backgroundColor: integration?.primaryColor, color: integration?.fontColor }}
                                     />
                                 )}
                             </div>
