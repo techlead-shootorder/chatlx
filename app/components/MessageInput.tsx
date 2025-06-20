@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '../context/ChatContext';
 
 export default function MessageInput() {
-  const { sendMessage, isLoading, currentChatId, integration } = useChat();
+  const { sendMessage, isLoading, currentChatId, integration, chatbotdata } = useChat();
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -71,7 +71,7 @@ export default function MessageInput() {
 
   return (
     <div className="p-4 border-t border-gray-800"
-    style={{backgroundColor: integration?.primaryColor}}
+    style={{backgroundColor: chatbotdata?.primaryColor}}
     >
       <div className="max-w-3xl mx-auto relative">
         <textarea
@@ -83,7 +83,7 @@ export default function MessageInput() {
           onKeyDown={handleKeyPress}
           rows={1}
           disabled={isLoading || !currentChatId}
-          style={{backgroundColor: integration?.secondaryColor}}
+          style={{backgroundColor: chatbotdata?.secondaryColor}}
         ></textarea>
         <button
           onClick={handleSend}

@@ -30,7 +30,7 @@ export default function ChatArea() {
     console.log("testing font color in integration", integration);
     return (
         <div className=" flex-1 overflow-y-auto p-4"
-        style={{ backgroundColor: integration?.primaryColor}}>
+        style={{ backgroundColor: chatbotdata?.primaryColor}}>
             <div className="max-w-3xl mx-auto">
                 {!isNewChat ? (
                     // Regular chat view
@@ -48,7 +48,7 @@ export default function ChatArea() {
                                     <div
                                         className="inline-block rounded-lg p-3 text-white max-w-md"
                                         dangerouslySetInnerHTML={{ __html: message.content }}
-                                        style={{backgroundColor: integration?.primaryColor, color: integration?.fontColor }}
+                                        style={{backgroundColor: chatbotdata?.primaryColor, color: chatbotdata?.fontColor }}
                                     />
                                 )}
                             </div>
@@ -75,7 +75,7 @@ export default function ChatArea() {
                                         <span
                                             key={index}
                                             className="px-4 py-2 text-gray-300 rounded-full text-sm cursor-pointer"
-                                            style={{backgroundColor: integration?.secondaryColor}}
+                                            style={{backgroundColor: chatbotdata?.secondaryColor}}
                                             onClick={handlePills}
                                         >
                                             {topic}

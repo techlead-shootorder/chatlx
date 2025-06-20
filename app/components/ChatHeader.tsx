@@ -29,7 +29,7 @@ const ChatHeader = () => {
    const { integration, chats, currentChatId, createNewChat, switchChat, botId, chatbotdata } = useChat();
   return (
     <div className="flex items-center justify-end p-4 border-b border-gray-800"
-    style={{backgroundColor: integration?.primaryColor}}
+    style={{backgroundColor: chatbotdata?.primaryColor}}
     >
 
       {/* Theme Toggle Icon */}
@@ -42,7 +42,7 @@ const ChatHeader = () => {
 
       {/* Sign-in Button */}
       <button className=" text-white font-medium px-4 py-2 rounded-full"
-      style={{backgroundColor: integration?.secondaryColor}}
+      style={{backgroundColor: chatbotdata?.secondaryColor}}
       >
         Sign in
       </button>

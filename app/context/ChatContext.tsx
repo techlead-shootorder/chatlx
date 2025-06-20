@@ -56,6 +56,7 @@ type Chatbot = {
   user?: User;
   integrations: Integration[];
   createdAt: Date;
+  isActive: boolean;
 }
 
 interface ChatContextType {
@@ -69,6 +70,7 @@ interface ChatContextType {
   currentChatId: string | null;
   createNewChat: () => void;
   switchChat: (chatId: string) => void;
+  isChatbotActive: boolean;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -79,14 +81,15 @@ const generateId = () => Math.random().toString(36).substring(2, 15);
 export function ChatProvider({ children }: { children: ReactNode }) {
   const params = useParams();
   const router = useRouter();
-  const botId = params?.botId as string || null; 
-  
+  const botId = params?.botId as string || null;
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [integration, setIntegration] = useState<Integration | null>(null);
   const [chatbotdata, setChatbotdata] = useState<Chatbot | null>(null); // Changed to match the context value
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [isChatbotActive, setIsChatbotActive] = useState(true);
 
   // Load chats from localStorage on initial render
   useEffect(() => {
@@ -107,19 +110,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const fetchChatbot = async () => {
       try {
         if (!botId) return; // Ensure botId is available
-  
+
         const response = await fetch(`/api/chatbot/get?chatbotId=${botId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch chatbot");
         }
-  
+
         const data = await response.json();
+        console.log("data", data);
         setChatbotdata(data);
+        console.log("data.isActive", data.isActive);
+        //condition to check if bot is active or inactive
+        if (data.isActive === false) {
+          setIsChatbotActive(false);
+          return; // Stop further execution
+        }
       } catch (error) {
         console.error("Error fetching chatbot:", error);
       }
     };
-  
+
     fetchChatbot();
   }, [botId]);
 
@@ -138,13 +148,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         const response = await fetch(`/api/customize/get?chatbotId=${botId}`);
         if (!response.ok) throw new Error('Failed to fetch integration data');
         const data = await response.json();
-       
+
         setIntegration(data);
       } catch (error) {
         console.error("Error fetching integration:", error);
       }
     };
-    
+
     fetchIntegration();
   }, [botId]);
 
@@ -156,7 +166,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         if (!response.ok) throw new Error('Failed to fetch chatbot config');
         const config = await response.json();
         const welcomeMessage = config.welcomeMessage || 'Hello! How can I assist you?';
-        
+
         // If there are no chats or no current chat selected, create a new one
         if (chats.length === 0 || !currentChatId) {
           const newChatId = generateId();
@@ -166,7 +176,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             messages: [{ role: 'assistant', content: welcomeMessage }],
             createdAt: new Date()
           };
-          
+
           setChats([newChat]);
           setCurrentChatId(newChatId);
           setMessages([{ role: 'assistant', content: welcomeMessage }]);
@@ -184,7 +194,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.log("Error fetching config:", error);
         const welcomeMessage = 'Hello! How can I assist you?';
-        
+
         if (chats.length === 0 || !currentChatId) {
           const newChatId = generateId();
           const newChat: Chat = {
@@ -193,24 +203,24 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             messages: [{ role: 'assistant', content: welcomeMessage }],
             createdAt: new Date()
           };
-          
+
           setChats([newChat]);
           setCurrentChatId(newChatId);
           setMessages([{ role: 'assistant', content: welcomeMessage }]);
         }
       }
     };
-    
+
     fetchChatbotConfig();
   }, [botId, currentChatId]);
 
   // Update messages in the current chat whenever messages change
   useEffect(() => {
     if (currentChatId && messages.length > 0) {
-      setChats(prevChats => 
-        prevChats.map(chat => 
-          chat.id === currentChatId 
-            ? { ...chat, messages, title: getChatTitle(messages) } 
+      setChats(prevChats =>
+        prevChats.map(chat =>
+          chat.id === currentChatId
+            ? { ...chat, messages, title: getChatTitle(messages) }
             : chat
         )
       );
@@ -218,7 +228,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [messages, currentChatId]);
 
 
- 
+
 
   // Function to generate a title from the first user message
   const getChatTitle = (chatMessages: Message[]): string => {
@@ -240,7 +250,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         messages: [{ role: 'assistant', content: welcomeMessage }],
         createdAt: new Date()
       };
-      
+
       setChats(prevChats => [newChat, ...prevChats]);
       setCurrentChatId(newChatId);
       setMessages([{ role: 'assistant', content: welcomeMessage }]);
@@ -249,7 +259,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const fetchWelcomeMessage = async (): Promise<string> => {
     if (!botId) return 'Hello! How can I assist you?';
-    
+
     try {
       const response = await fetch(`/api/chatbot/config?botId=${botId}`);
       if (!response.ok) throw new Error('Failed to fetch chatbot config');
@@ -273,17 +283,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (!message.trim() || isLoading) {
       return;
     }
-   
+
     const userMessage = { role: 'user', content: message };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setIsLoading(true);
-    
+
     try {
       const response = await fetch('/api/chatbot/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           messages: updatedMessages.map(msg => ({
             role: msg.role,
             content: msg.content
@@ -291,13 +301,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           id: botId
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error('API response error: ' + response.statusText);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const botResponse = data.choices[0].message.content;
         setMessages(prev => [...prev, { role: 'assistant', content: botResponse }]);
@@ -306,9 +316,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error in chat flow:', error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Sorry, I encountered an error processing your request. Please try again later.' 
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error processing your request. Please try again later.'
       }]);
     } finally {
       setIsLoading(false);
@@ -316,17 +326,18 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ChatContext.Provider value={{ 
-      messages, 
-      sendMessage, 
-      isLoading, 
-      botId, 
-      integration, 
+    <ChatContext.Provider value={{
+      messages,
+      sendMessage,
+      isLoading,
+      botId,
+      integration,
       chatbotdata,
-      chats, 
-      currentChatId, 
-      createNewChat, 
-      switchChat 
+      chats,
+      currentChatId,
+      createNewChat,
+      switchChat,
+      isChatbotActive
     }}>
       {children}
     </ChatContext.Provider>
