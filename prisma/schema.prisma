@@ -78,6 +78,8 @@ model Chatbot {
   fontColor          String         @default("#ffffff")
   primaryColor       String         @default("#181818")
   secondaryColor     String         @default("#303030")
+  metaDescription    String         @default("Chatlx is an AI-powered chatbot designed to streamline customer interactions, enhance user engagement, and provide instant support across industries.")
+  metaTitle          String         @default("Chatlx - AI-Powered")
   user               User?          @relation(fields: [createdBy], references: [id])
   Conversation       Conversation[]
   integrations       Integration[]
