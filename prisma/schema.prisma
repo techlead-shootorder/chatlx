@@ -87,22 +87,25 @@ model Chatbot {
 }
 
 model User {
-  id                    String                 @id @default(uuid())
-  email                 String                 @unique
-  password              String?
-  createdAt             DateTime               @default(now())
-  company               String?
-  fullName              String?
-  phone                 String?
-  timezone              String?                @default("UTC")
-  chatbots              Chatbot[]
-  Customer              Customer[]
-  Feedback              Feedback[]
-  leads                 Lead[]                 @relation("UserLeads")
-  paymentOrders         PaymentOrder[]
-  razorpaySubscriptions RazorpaySubscription[]
-  subscription          Subscription?
-  SupportTicket         SupportTicket[]
+  id                       String                 @id @default(uuid())
+  email                    String                 @unique
+  password                 String?
+  createdAt                DateTime               @default(now())
+  company                  String?
+  fullName                 String?
+  phone                    String?
+  timezone                 String?                @default("UTC")
+  emailVerificationExpires DateTime?
+  emailVerificationToken   String?
+  emailVerified            Boolean                @default(false)
+  chatbots                 Chatbot[]
+  Customer                 Customer[]
+  Feedback                 Feedback[]
+  leads                    Lead[]                 @relation("UserLeads")
+  paymentOrders            PaymentOrder[]
+  razorpaySubscriptions    RazorpaySubscription[]
+  subscription             Subscription?
+  SupportTicket            SupportTicket[]
 }
 
 model Lead {
