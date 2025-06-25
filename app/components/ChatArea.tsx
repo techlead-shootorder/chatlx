@@ -8,6 +8,7 @@ export default function ChatArea() {
     const { messages, isLoading, integration, sendMessage, currentChatId, chatbotdata } = useChat();
     console.log("chatbot data testing in chatarea", chatbotdata);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    // adding comment to push the code
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
